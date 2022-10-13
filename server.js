@@ -1,56 +1,50 @@
-const express = require('express')
-const { Router } = express
-const routerProducts = Router()
-const apiContainer = require ('./src/containers/apiContainer') // import de clase constructora
-const { engine } = require('express-handlebars')
+const express = require('express');
+const app = express();
+const Contenedor = require ('../../desafio2/Contenedor');
 
-// const routerProduct = require('./src/routes/products') // --> 3° importo router
+const {Server:HttpServer} = require('http')
+const {Server:IOServer} = require('socket.io');
+const httpServer = new HttpServer(app);
 
-const app = express()
+app.use(express.static('./public'));
 
-app.engine('handlebars', engine())
+const contenedorMensajes = new Contenedor('chat.txt');
+const contenedorProductos = new Contenedor('productos.txt');
 
-// establecemos el motor de plantilla a utilizar
-app.set('view engine', 'handlebars')
-// establecemos directorio donde se encuentran los archivos de plantilla
-app.set('views', './views')
+const io = new IOServer(httpServer);
+const productos = [
+];
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: true}))
-app.use('/api/products', routerProducts)
-app.use(express.static('public'))
+const mensajes = [
+];
 
-
-const products = []
-let api = new apiContainer(products)
-
-routerProducts.get('/', (req, res) => {
-    res.render('products', { products })
+io.on('connection',(socket)=>{
+    console.log("Nuevo cliente conectado");
+    socket.emit('mensajes',mensajes);
+    socket.emit('productos',productos);
+    socket.on('nuevo-mensaje',mensaje=>{
+        io.sockets.emit('mensajes',mensajes); //No emite solo en este socket si no que comunica a todos los sockets que estén conectados utilizando el método connect de io
+        if(mensajes.length==0){
+            mensajes.push(mensaje);
+            contenedorMensajes.save(mensajes);
+        }
+        else{
+            mensajes.push(mensaje);
+            contenedorMensajes.save(mensaje);  
+        }
+    })
+    socket.on('nuevo-producto',producto=>{
+        io.sockets.emit('productos',productos); //No emite solo en este socket si no que comunica a todos los sockets que estén conectados utilizando el método connect de io
+        if(productos.length==0){
+            productos.push(producto);
+            contenedorProductos.save(productos);
+        }
+        else{
+            productos.push(producto);
+            contenedorProductos.save(producto);
+        }
+    })
 })
 
-routerProducts.post('/', (req, res) => {
-    api.addProduct(req, res);
-})
-
-routerProducts.get('/:id', (req, res) => {
-    api.getProduct(req, res);
-})
-
-routerProducts.put('/:id', (req, res) => {
-    api.modifyProduct(req, res);
-})
-
-routerProducts.delete('/:id', (req, res) => {
-    api.deleteProduct(req, res);
-})
-
-
-
-// Running server
-const PORT = process.env.port || 8080
-
-const server = app.listen(PORT, () => {
-    console.log(`HTTP Server running on port ${server.address().port}`)
-})
-
-server.on("error", error => console.log(`Error on server ${error}`))
+const PORT = 8080;
+httpServer.listen(PORT,()=>console.log("SERVER ON")).on('error',error=>console.log(`Error en el servidor ${error}`));
