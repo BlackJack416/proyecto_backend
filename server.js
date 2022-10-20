@@ -1,50 +1,25 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const Contenedor = require ('../../desafio2/Contenedor');
+const productosRouter = require("./routes/productos");
+const carritoRouter = require("./routes/carrito");
 
-const {Server:HttpServer} = require('http')
-const {Server:IOServer} = require('socket.io');
-const httpServer = new HttpServer(app);
+app.use(express.static("public"));
 
-app.use(express.static('./public'));
+app.use("/api/productos", productosRouter);
+app.use("/api/carrito", carritoRouter);
 
-const contenedorMensajes = new Contenedor('chat.txt');
-const contenedorProductos = new Contenedor('productos.txt');
+app.set("view engine", "ejs");
 
-const io = new IOServer(httpServer);
-const productos = [
-];
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/public/index.html");
+});
 
-const mensajes = [
-];
+app.get("*", (req, res) => {
+    res.json("Error: Ruta o metodo no implementado");
+});
 
-io.on('connection',(socket)=>{
-    console.log("Nuevo cliente conectado");
-    socket.emit('mensajes',mensajes);
-    socket.emit('productos',productos);
-    socket.on('nuevo-mensaje',mensaje=>{
-        io.sockets.emit('mensajes',mensajes); //No emite solo en este socket si no que comunica a todos los sockets que estén conectados utilizando el método connect de io
-        if(mensajes.length==0){
-            mensajes.push(mensaje);
-            contenedorMensajes.save(mensajes);
-        }
-        else{
-            mensajes.push(mensaje);
-            contenedorMensajes.save(mensaje);  
-        }
-    })
-    socket.on('nuevo-producto',producto=>{
-        io.sockets.emit('productos',productos); //No emite solo en este socket si no que comunica a todos los sockets que estén conectados utilizando el método connect de io
-        if(productos.length==0){
-            productos.push(producto);
-            contenedorProductos.save(productos);
-        }
-        else{
-            productos.push(producto);
-            contenedorProductos.save(producto);
-        }
-    })
-})
-
-const PORT = 8080;
-httpServer.listen(PORT,()=>console.log("SERVER ON")).on('error',error=>console.log(`Error en el servidor ${error}`));
+const PORT = process.env.PORT || 8080;
+const server = app.listen(PORT, () => {
+    console.log(`Server listening on PORT: ${PORT}`);
+});
+server.on('error', err => console.log( 'Error at server: ' + err ));
