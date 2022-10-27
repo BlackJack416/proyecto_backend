@@ -70,10 +70,12 @@ function showProductos(listaDeProductos) {
         html += `<button type="button" class="btn btn-primary" data-bs-toggle="modal" id=" " data-bs-target="#staticBackdrop">Add Productos</button>`;
     } else {
         html = `<p class="mt-3 mb-3 p-3">No se encontraron productos</p>`;
+        //Será que acá está el problema? funcion addProductos que pueda pushear el item seleccionado. Dice undefined por que en realidad no estoy
+        // trayendo nada a ese carrito?
         html += `<button type="button" class="btn btn-primary" data-bs-toggle="modal" id="addProductos" data-bs-target="#staticBackdrop">Add Productos</button>`;
         
     }
-    div_prod.innerHTML = html;
+    div_prod.innerHTML = html; 
     addEventsToButtons();
 }
 

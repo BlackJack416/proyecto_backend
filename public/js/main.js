@@ -122,7 +122,7 @@ function showProductos(listaDeProductos) {
         listaDeProductos.forEach(p => {
             html += `
             <div class="row">
-                <div class="col-sm-6">
+                <div>
                     <div class="card" style="width: 18rem;">
                     <img src="${p.url}" class="card-img-top" alt="${p.name}">
                     <div class="card-body text-center">
@@ -130,9 +130,7 @@ function showProductos(listaDeProductos) {
                         <p class="card-text">${p.store}</p>
                         <p class="card-text">${p.description}</p>
                         <p class="card-text ">$${p.price}</p>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-prod-id="${p.id}" data-bs-target="#staticBackdrop">
-                        ${p.id}
-                    </button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-prod-id="${p.id}" data-bs-target="#staticBackdrop">${p.id}</button>
                     </div>
                     </div>
                 </div>
