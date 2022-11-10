@@ -1,1 +1,0 @@
-rstoragedenginewiredTigeroptions?directoryPerDBdirectoryForIndexesgroupCollections
